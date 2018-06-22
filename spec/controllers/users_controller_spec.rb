@@ -29,7 +29,7 @@ RSpec.describe UsersController, type: :controller do
   # User. As you add validations to User, be sure to
   # adjust the attributes here as well.
   let(:valid_attributes) {
-    { handle: "Kay", password_hash: "eawgewewhaw" }
+    { handle: "Kay", password: "rockhudson" }
   }
 
   let(:invalid_attributes) {
