@@ -13,7 +13,7 @@ class User < ApplicationRecord
   end
 
   def generate_session_key!
-    key = BCrypt::Engine.generate_salt
+    key = BCrypt::Engine.generate_salt.gsub(/[^a-z0-9]/i, '_')
     update!(session_key: key)
     key
   end
