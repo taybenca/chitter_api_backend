@@ -24,19 +24,24 @@ require 'rails_helper'
 # `rails-controller-testing` gem.
 
 RSpec.describe LikesController, type: :controller do
+  include AuthorizationHelpers
   let(:user) { User.create!(handle: "Kay", password_hash: "gewagewagewa") }
   let(:other_user) { User.create!(handle: "Matt", password_hash: "xcvxcvxv") }
-  let(:peep) { user.peeps.create!(body: "Hello!") }
+  let(:peep) { other_user.peeps.create!(body: "Hello!") }
 
   # This should return the minimal set of attributes required to create a valid
   # Like. As you add validations to Like, be sure to
   # adjust the attributes here as well.
   let(:valid_attributes) {
-    { user_id: other_user.id, peep_id: peep.id }
+    { user_id: user.id, peep_id: peep.id }
   }
 
   let(:invalid_attributes) {
-    { user_id: nil, peep_id: nil }
+    { user_id: user.id, peep_id: nil }
+  }
+
+  let(:unauthorized_user_attributes) {
+    { user_id: other_user.id, peep_id: peep.id }
   }
 
   # This should return the minimal set of values that should be in the session
@@ -63,13 +68,14 @@ RSpec.describe LikesController, type: :controller do
   describe "POST #create" do
     context "with valid params" do
       it "creates a new Like" do
+        authorize!
         expect {
           post :create, params: {like: valid_attributes}, session: valid_session
         }.to change(Like, :count).by(1)
       end
 
       it "renders a JSON response with the new like" do
-
+        authorize!
         post :create, params: {like: valid_attributes}, session: valid_session
         expect(response).to have_http_status(:created)
         expect(response.content_type).to eq('application/json')
@@ -79,20 +85,57 @@ RSpec.describe LikesController, type: :controller do
 
     context "with invalid params" do
       it "renders a JSON response with errors for the new like" do
-
+        authorize!
         post :create, params: {like: invalid_attributes}, session: valid_session
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to eq('application/json')
+      end
+    end
+
+    context "with unauthorized user params" do
+      it "renders a JSON response with errors for the new like" do
+        authorize!
+        post :create, params: {like: unauthorized_user_attributes}, session: valid_session
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+    context "with bad token" do
+      it "renders a JSON response with errors for the new like" do
+        authorize_badly!
+        post :create, params: {like: valid_attributes}, session: valid_session
+        expect(response).to have_http_status(:unauthorized)
       end
     end
   end
 
   describe "DELETE #destroy" do
     it "destroys the requested like" do
+      authorize!
       like = Like.create! valid_attributes
       expect {
         delete :destroy, params: {id: like.to_param}, session: valid_session
       }.to change(Like, :count).by(-1)
+    end
+
+    context "with unauthorized user params" do
+      it "renders a JSON response with errors for the new like" do
+        authorize!
+        like = Like.create! unauthorized_user_attributes
+        expect {
+          delete :destroy, params: {id: like.to_param}, session: valid_session
+        }.not_to change(Like, :count)
+      end
+    end
+
+    context "with bad token" do
+      it "renders a JSON response with errors for the new like" do
+        authorize_badly!
+        like = Like.create! valid_attributes
+        expect {
+          delete :destroy, params: {id: like.to_param}, session: valid_session
+        }.not_to change(Like, :count)
+      end
     end
   end
 

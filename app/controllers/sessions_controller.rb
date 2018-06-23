@@ -1,11 +1,13 @@
 class SessionsController < ApplicationController
+  INVALID_AUTH_ERRORS = { password: "Invalid username or password" }
+
   # POST /sessions
   def create
     user = User.find_by(handle: params[:session][:handle])
     if user.authenticate(params[:session][:password])
-      render json: {}, status: :created
+      render json: { session_key: user.generate_session_key! }, status: :created
     else
-      render json: {}, status: :unprocessable_entity
+      render json: { errors: INVALID_AUTH_ERRORS }, status: :unprocessable_entity
     end
   end
 

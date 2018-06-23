@@ -24,7 +24,9 @@ require 'rails_helper'
 # `rails-controller-testing` gem.
 
 RSpec.describe PeepsController, type: :controller do
+  include AuthorizationHelpers
   let(:user) { User.create!(handle: "Kay", password_hash: "gewagewagewa") }
+  let(:other_user) { User.create!(handle: "Dog", password_hash: "feafewafea") }
 
   # This should return the minimal set of attributes required to create a valid
   # Peep. As you add validations to Peep, be sure to
@@ -34,7 +36,11 @@ RSpec.describe PeepsController, type: :controller do
   }
 
   let(:invalid_attributes) {
-    { user_id: nil, body: nil }
+    { user_id: user.id, body: nil }
+  }
+
+  let(:unauthorized_user_attributes) {
+    { user_id: other_user.id, body: "world" }
   }
 
   # This should return the minimal set of values that should be in the session
@@ -61,13 +67,14 @@ RSpec.describe PeepsController, type: :controller do
   describe "POST #create" do
     context "with valid params" do
       it "creates a new Peep" do
+        authorize!
         expect {
           post :create, params: {peep: valid_attributes}, session: valid_session
         }.to change(Peep, :count).by(1)
       end
 
       it "renders a JSON response with the new peep" do
-
+        authorize!
         post :create, params: {peep: valid_attributes}, session: valid_session
         expect(response).to have_http_status(:created)
         expect(response.content_type).to eq('application/json')
@@ -77,28 +84,54 @@ RSpec.describe PeepsController, type: :controller do
 
     context "with invalid params" do
       it "renders a JSON response with errors for the new peep" do
-
+        authorize!
         post :create, params: {peep: invalid_attributes}, session: valid_session
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to eq('application/json')
       end
     end
+
+    context "with unauthorised user params" do
+      it "responds unauthorized" do
+        authorize_badly!
+        post :create, params: {peep: unauthorized_user_attributes}, session: valid_session
+        expect(response).to have_http_status(:unauthorized)
+      end
+
+      it "does not create the peep" do
+        authorize!
+        expect {
+          post :create, params: {peep: unauthorized_user_attributes}, session: valid_session
+        }.not_to change(Peep, :count)
+      end
+    end
+
+    context "with invalid token" do
+      it "forbids access" do
+        authorize_badly!
+        post :create, params: {peep: valid_attributes}, session: valid_session
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
   end
 
   describe "PUT #update" do
-    context "with valid params" do
-      let(:new_attributes) {
-        { body: "Woop!" }
-      }
+    let(:new_attributes) {
+      { body: "Woop!" }
+    }
 
+    context "with valid params" do
       it "updates the requested peep" do
+        authorize!
         peep = Peep.create! valid_attributes
+
         put :update, params: {id: peep.to_param, peep: new_attributes}, session: valid_session
         peep.reload
         expect(peep.body).to eq new_attributes[:body]
       end
 
       it "renders a JSON response with the peep" do
+        authorize!
         peep = Peep.create! valid_attributes
 
         put :update, params: {id: peep.to_param, peep: valid_attributes}, session: valid_session
@@ -109,6 +142,7 @@ RSpec.describe PeepsController, type: :controller do
 
     context "with invalid params" do
       it "renders a JSON response with errors for the peep" do
+        authorize!
         peep = Peep.create! valid_attributes
 
         put :update, params: {id: peep.to_param, peep: invalid_attributes}, session: valid_session
@@ -116,14 +150,75 @@ RSpec.describe PeepsController, type: :controller do
         expect(response.content_type).to eq('application/json')
       end
     end
+
+    context "with unauthorised user params" do
+      it "responds unauthorized" do
+        authorize!
+        peep = Peep.create! unauthorized_user_attributes
+
+        put :update, params: {id: peep.to_param, peep: new_attributes}, session: valid_session
+        expect(response).to have_http_status(:unauthorized)
+      end
+
+      it "does not update the peep" do
+        authorize!
+        peep = Peep.create! unauthorized_user_attributes
+
+        put :update, params: {id: peep.to_param, peep: new_attributes}, session: valid_session
+        peep.reload
+        expect(peep.body).to eq unauthorized_user_attributes[:body]
+      end
+    end
+
+    context "with invalid token" do
+      it "responds unauthorized" do
+        authorize_badly!
+        peep = Peep.create! valid_attributes
+
+        put :update, params: {id: peep.to_param, peep: new_attributes}, session: valid_session
+        expect(response).to have_http_status(:unauthorized)
+      end
+
+      it "does not update the peep" do
+        authorize_badly!
+        peep = Peep.create! valid_attributes
+
+        put :update, params: {id: peep.to_param, peep: new_attributes}, session: valid_session
+        peep.reload
+        expect(peep.body).to eq valid_attributes[:body]
+      end
+    end
   end
 
   describe "DELETE #destroy" do
-    it "destroys the requested peep" do
-      peep = Peep.create! valid_attributes
-      expect {
-        delete :destroy, params: {id: peep.to_param}, session: valid_session
-      }.to change(Peep, :count).by(-1)
+    context "with valid params" do
+      it "destroys the requested peep" do
+        authorize!
+        peep = Peep.create! valid_attributes
+        expect {
+          delete :destroy, params: {id: peep.to_param}, session: valid_session
+        }.to change(Peep, :count).by(-1)
+      end
+    end
+
+    context "with unauthorised user params" do
+      it "does not destroy the requested peep" do
+        authorize!
+        peep = Peep.create! unauthorized_user_attributes
+        expect {
+          delete :destroy, params: {id: peep.to_param}, session: valid_session
+        }.not_to change(Peep, :count)
+      end
+    end
+
+    context "with invalid token" do
+      it "destroys the requested peep" do
+        authorize_badly!
+        peep = Peep.create! valid_attributes
+        expect {
+          delete :destroy, params: {id: peep.to_param}, session: valid_session
+        }.not_to change(Peep, :count)
+      end
     end
   end
 

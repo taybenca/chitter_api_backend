@@ -10,4 +10,10 @@ class User < ApplicationRecord
   def authenticate(password)
     BCrypt::Password.new(password_hash) == password
   end
+
+  def generate_session_key!
+    key = BCrypt::Engine.generate_salt
+    update!(session_key: key)
+    key
+  end
 end

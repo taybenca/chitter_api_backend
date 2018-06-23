@@ -1,5 +1,8 @@
 class LikesController < ApplicationController
+  include ActionController::HttpAuthentication::Token::ControllerMethods
   before_action :set_like, only: [:show, :update, :destroy]
+  before_action :authorize_create, only: [:create]
+  before_action :authorize_modify, only: [:destroy]
 
   # GET /likes
   def index
@@ -38,5 +41,22 @@ class LikesController < ApplicationController
     # Only allow a trusted parameter "white list" through.
     def like_params
       params.require(:like).permit(:user_id, :peep_id)
+    end
+
+    def authorize_create
+      authenticate_or_request_with_http_token do |token, options|
+        next false if like_params[:user_id].blank?
+        user = User.find(like_params[:user_id])
+        next false if user.session_key.blank?
+        ActiveSupport::SecurityUtils.secure_compare(token, user.session_key)
+      end
+    end
+
+    def authorize_modify
+      authenticate_or_request_with_http_token do |token, options|
+        set_like
+        next false if @like.user.session_key.blank?
+        ActiveSupport::SecurityUtils.secure_compare(token, @like.user.session_key)
+      end
     end
 end
