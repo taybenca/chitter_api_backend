@@ -12,9 +12,12 @@
 
 ActiveRecord::Schema.define(version: 2018_06_22_173432) do
 
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "likes", force: :cascade do |t|
-    t.integer "user_id"
-    t.integer "peep_id"
+    t.bigint "user_id"
+    t.bigint "peep_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["peep_id"], name: "index_likes_on_peep_id"
@@ -22,7 +25,7 @@ ActiveRecord::Schema.define(version: 2018_06_22_173432) do
   end
 
   create_table "peeps", force: :cascade do |t|
-    t.integer "user_id"
+    t.bigint "user_id"
     t.text "body"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -37,4 +40,7 @@ ActiveRecord::Schema.define(version: 2018_06_22_173432) do
     t.string "session_key"
   end
 
+  add_foreign_key "likes", "peeps"
+  add_foreign_key "likes", "users"
+  add_foreign_key "peeps", "users"
 end
