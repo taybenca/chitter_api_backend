@@ -6,7 +6,7 @@ class PeepsController < ApplicationController
 
   # GET /peeps
   def index
-    @peeps = Peep.all
+    @peeps = Peep.all.limit(50)
 
     render json: @peeps
   end
