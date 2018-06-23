@@ -59,7 +59,7 @@ On success, the above command returns JSON structured like this:
 
 ### Peeps
 
-### GET `/peeps`
+#### GET `/peeps`
 
 Returns a list of the last 50 peeps in reverse chronological order.
 
@@ -163,7 +163,7 @@ curl "https://chitter-backend-api.herokuapp.com/peeps/1" \
 
 The above command returns a `204: No Content` response on success.
 
-### Likes
+### Likes
 
 #### PUT `/peeps/:peep_id/likes/:user_id`
 
@@ -202,7 +202,7 @@ curl "https://chitter-backend-api.herokuapp.com/peeps/2/likes/1" \
 
 The above command returns a `204: No Content` response on success.
 
-## API Development Quickstart
+## API Development Quickstart
 
 **If you're doing the challenge — you don't need to do this.**
 
