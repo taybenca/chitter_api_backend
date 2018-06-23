@@ -3,6 +3,9 @@ class User < ApplicationRecord
 
   validates_presence_of :handle, :password_hash
   validates_uniqueness_of :handle
+  validates_length_of :handle,
+    maximum: 30,
+    message: 'Handles must be under 30 characters.'
 
   def password=(password)
     self.password_hash = BCrypt::Password.create(password)

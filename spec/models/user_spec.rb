@@ -25,4 +25,11 @@ RSpec.describe User, type: :model do
       expect(user.session_key).to eq key
     end
   end
+
+  it "must have a handle of under 30 characters" do
+    invalid_user = User.new(handle: "a" * 31, password: "horse")
+    valid_user = User.new(handle: "a" * 30, password: "horse")
+    expect(invalid_user).not_to be_valid
+    expect(valid_user).to be_valid
+  end
 end
