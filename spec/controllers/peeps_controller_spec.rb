@@ -85,7 +85,7 @@ RSpec.describe PeepsController, type: :controller do
         "likes" => [
           {
             "user" => {
-              "id" => 2,
+              "id" => other_user.id,
               "handle" => "Dog"
             }
           }
