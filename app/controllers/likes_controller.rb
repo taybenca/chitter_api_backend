@@ -1,11 +1,9 @@
 class LikesController < ApplicationController
   include ActionController::HttpAuthentication::Token::ControllerMethods
-  before_action :set_like, only: [:destroy]
-  before_action :authorize_create, only: [:create]
-  before_action :authorize_modify, only: [:destroy]
+  before_action :authorize
 
   # POST /likes
-  def create
+  def update
     @like = Like.new(like_params)
 
     if @like.save
@@ -17,34 +15,25 @@ class LikesController < ApplicationController
 
   # DELETE /likes/1
   def destroy
+    @like = Like.find_by(like_params)
     @like.destroy
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_like
-      @like = Like.find(params[:id])
-    end
-
     # Only allow a trusted parameter "white list" through.
     def like_params
-      params.require(:like).permit(:user_id, :peep_id)
+      {
+        user_id: params[:user_id],
+        peep_id: params[:peep_id]
+      }
     end
 
-    def authorize_create
+    def authorize
       authenticate_or_request_with_http_token do |token, options|
         next false if like_params[:user_id].blank?
         user = User.find(like_params[:user_id])
         next false if user.session_key.blank?
         ActiveSupport::SecurityUtils.secure_compare(token, user.session_key)
-      end
-    end
-
-    def authorize_modify
-      authenticate_or_request_with_http_token do |token, options|
-        set_like
-        next false if @like.user.session_key.blank?
-        ActiveSupport::SecurityUtils.secure_compare(token, @like.user.session_key)
       end
     end
 end

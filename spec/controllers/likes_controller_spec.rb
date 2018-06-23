@@ -36,10 +36,6 @@ RSpec.describe LikesController, type: :controller do
     { user_id: user.id, peep_id: peep.id }
   }
 
-  let(:invalid_attributes) {
-    { user_id: user.id, peep_id: nil }
-  }
-
   let(:unauthorized_user_attributes) {
     { user_id: other_user.id, peep_id: peep.id }
   }
@@ -49,18 +45,18 @@ RSpec.describe LikesController, type: :controller do
   # LikesController. Be sure to keep this updated too.
   let(:valid_session) { {} }
 
-  describe "POST #create" do
+  describe "PUT/PATCH #update" do
     context "with valid params" do
       it "creates a new Like" do
         authorize!
         expect {
-          post :create, params: {peep_id: peep.id, like: valid_attributes}, session: valid_session
+          put :update, params: valid_attributes, session: valid_session
         }.to change(Like, :count).by(1)
       end
 
       it "renders a JSON response with the new like" do
         authorize!
-        post :create, params: {peep_id: peep.id, like: valid_attributes}, session: valid_session
+        put :update, params: valid_attributes, session: valid_session
         expect(response).to have_http_status(:created)
         expect(response.content_type).to eq('application/json')
         like = Like.last
@@ -68,19 +64,10 @@ RSpec.describe LikesController, type: :controller do
       end
     end
 
-    context "with invalid params" do
-      it "renders a JSON response with errors for the new like" do
-        authorize!
-        post :create, params: {peep_id: peep.id, like: invalid_attributes}, session: valid_session
-        expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.content_type).to eq('application/json')
-      end
-    end
-
     context "with unauthorized user params" do
       it "renders a JSON response with errors for the new like" do
         authorize!
-        post :create, params: {peep_id: peep.id, like: unauthorized_user_attributes}, session: valid_session
+        put :update, params: unauthorized_user_attributes, session: valid_session
         expect(response).to have_http_status(:unauthorized)
       end
     end
@@ -88,8 +75,18 @@ RSpec.describe LikesController, type: :controller do
     context "with bad token" do
       it "renders a JSON response with errors for the new like" do
         authorize_badly!
-        post :create, params: {peep_id: peep.id, like: valid_attributes}, session: valid_session
+        put :update, params: valid_attributes, session: valid_session
         expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+    context "when liking twice" do
+      it "renders a JSON response with errors for the duplicate user" do
+        authorize!
+        put :update, params: valid_attributes, session: valid_session
+        put :update, params: valid_attributes, session: valid_session
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.content_type).to eq('application/json')
       end
     end
   end
@@ -99,7 +96,7 @@ RSpec.describe LikesController, type: :controller do
       authorize!
       like = Like.create! valid_attributes
       expect {
-        delete :destroy, params: {peep_id: peep.id, id: like.to_param}, session: valid_session
+        delete :destroy, params: valid_attributes, session: valid_session
       }.to change(Like, :count).by(-1)
     end
 
@@ -108,7 +105,7 @@ RSpec.describe LikesController, type: :controller do
         authorize!
         like = Like.create! unauthorized_user_attributes
         expect {
-          delete :destroy, params: {peep_id: peep.id, id: like.to_param}, session: valid_session
+          delete :destroy, params: unauthorized_user_attributes, session: valid_session
         }.not_to change(Like, :count)
       end
     end
@@ -118,7 +115,7 @@ RSpec.describe LikesController, type: :controller do
         authorize_badly!
         like = Like.create! valid_attributes
         expect {
-          delete :destroy, params: {peep_id: peep.id, id: like.to_param}, session: valid_session
+          delete :destroy, params: valid_attributes, session: valid_session
         }.not_to change(Like, :count)
       end
     end

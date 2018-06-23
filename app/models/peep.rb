@@ -5,6 +5,6 @@ class Peep < ApplicationRecord
   validates_presence_of :user, :body
 
   def as_json(options = {})
-    super({ except: :user_id, methods: :user }.merge(options))
+    super({ except: :user_id, methods: [:user, :likes] }.merge(options))
   end
 end

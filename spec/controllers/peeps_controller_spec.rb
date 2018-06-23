@@ -61,7 +61,8 @@ RSpec.describe PeepsController, type: :controller do
         "user" => {
           "id" => peep.user.id,
           "handle" => peep.user.handle
-        }
+        },
+        "likes" => []
       }])
     end
   end
@@ -69,6 +70,7 @@ RSpec.describe PeepsController, type: :controller do
   describe "GET #show" do
     it "returns a success response" do
       peep = Peep.create! valid_attributes
+      peep.likes.create!(user: other_user)
       get :show, params: {id: peep.to_param}, session: valid_session
       expect(response).to be_successful
       expect(JSON.parse(response.body)).to eq({
@@ -79,7 +81,15 @@ RSpec.describe PeepsController, type: :controller do
         "user" => {
           "id" => peep.user.id,
           "handle" => peep.user.handle
-        }
+        },
+        "likes" => [
+          {
+            "user" => {
+              "id" => 2,
+              "handle" => "Dog"
+            }
+          }
+        ]
       })
     end
   end
