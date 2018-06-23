@@ -1,27 +1,15 @@
 class LikesController < ApplicationController
   include ActionController::HttpAuthentication::Token::ControllerMethods
-  before_action :set_like, only: [:show, :update, :destroy]
+  before_action :set_like, only: [:destroy]
   before_action :authorize_create, only: [:create]
   before_action :authorize_modify, only: [:destroy]
-
-  # GET /likes
-  def index
-    @likes = Like.all
-
-    render json: @likes
-  end
-
-  # GET /likes/1
-  def show
-    render json: @like
-  end
 
   # POST /likes
   def create
     @like = Like.new(like_params)
 
     if @like.save
-      render json: @like, status: :created, location: @like
+      render json: @like, status: :created, location: [@like.peep, @like]
     else
       render json: @like.errors, status: :unprocessable_entity
     end

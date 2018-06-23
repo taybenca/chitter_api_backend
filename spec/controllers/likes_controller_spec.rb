@@ -49,44 +49,29 @@ RSpec.describe LikesController, type: :controller do
   # LikesController. Be sure to keep this updated too.
   let(:valid_session) { {} }
 
-  describe "GET #index" do
-    it "returns a success response" do
-      like = Like.create! valid_attributes
-      get :index, params: {}, session: valid_session
-      expect(response).to be_successful
-    end
-  end
-
-  describe "GET #show" do
-    it "returns a success response" do
-      like = Like.create! valid_attributes
-      get :show, params: {id: like.to_param}, session: valid_session
-      expect(response).to be_successful
-    end
-  end
-
   describe "POST #create" do
     context "with valid params" do
       it "creates a new Like" do
         authorize!
         expect {
-          post :create, params: {like: valid_attributes}, session: valid_session
+          post :create, params: {peep_id: peep.id, like: valid_attributes}, session: valid_session
         }.to change(Like, :count).by(1)
       end
 
       it "renders a JSON response with the new like" do
         authorize!
-        post :create, params: {like: valid_attributes}, session: valid_session
+        post :create, params: {peep_id: peep.id, like: valid_attributes}, session: valid_session
         expect(response).to have_http_status(:created)
         expect(response.content_type).to eq('application/json')
-        expect(response.location).to eq(like_url(Like.last))
+        like = Like.last
+        expect(response.location).to eq(peep_like_url(like.peep, like))
       end
     end
 
     context "with invalid params" do
       it "renders a JSON response with errors for the new like" do
         authorize!
-        post :create, params: {like: invalid_attributes}, session: valid_session
+        post :create, params: {peep_id: peep.id, like: invalid_attributes}, session: valid_session
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to eq('application/json')
       end
@@ -95,7 +80,7 @@ RSpec.describe LikesController, type: :controller do
     context "with unauthorized user params" do
       it "renders a JSON response with errors for the new like" do
         authorize!
-        post :create, params: {like: unauthorized_user_attributes}, session: valid_session
+        post :create, params: {peep_id: peep.id, like: unauthorized_user_attributes}, session: valid_session
         expect(response).to have_http_status(:unauthorized)
       end
     end
@@ -103,7 +88,7 @@ RSpec.describe LikesController, type: :controller do
     context "with bad token" do
       it "renders a JSON response with errors for the new like" do
         authorize_badly!
-        post :create, params: {like: valid_attributes}, session: valid_session
+        post :create, params: {peep_id: peep.id, like: valid_attributes}, session: valid_session
         expect(response).to have_http_status(:unauthorized)
       end
     end
@@ -114,7 +99,7 @@ RSpec.describe LikesController, type: :controller do
       authorize!
       like = Like.create! valid_attributes
       expect {
-        delete :destroy, params: {id: like.to_param}, session: valid_session
+        delete :destroy, params: {peep_id: peep.id, id: like.to_param}, session: valid_session
       }.to change(Like, :count).by(-1)
     end
 
@@ -123,7 +108,7 @@ RSpec.describe LikesController, type: :controller do
         authorize!
         like = Like.create! unauthorized_user_attributes
         expect {
-          delete :destroy, params: {id: like.to_param}, session: valid_session
+          delete :destroy, params: {peep_id: peep.id, id: like.to_param}, session: valid_session
         }.not_to change(Like, :count)
       end
     end
@@ -133,7 +118,7 @@ RSpec.describe LikesController, type: :controller do
         authorize_badly!
         like = Like.create! valid_attributes
         expect {
-          delete :destroy, params: {id: like.to_param}, session: valid_session
+          delete :destroy, params: {peep_id: peep.id, id: like.to_param}, session: valid_session
         }.not_to change(Like, :count)
       end
     end
