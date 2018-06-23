@@ -80,8 +80,16 @@ RSpec.describe UsersController, type: :controller do
 
     context "with invalid params" do
       it "renders a JSON response with errors for the new user" do
-
         post :create, params: {user: invalid_attributes}, session: valid_session
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.content_type).to eq('application/json')
+      end
+    end
+
+    context "with a duplicate handle" do
+      it "renders a JSON response with errors for the new user" do
+        post :create, params: {user: valid_attributes}, session: valid_session
+        post :create, params: {user: valid_attributes}, session: valid_session
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to eq('application/json')
       end

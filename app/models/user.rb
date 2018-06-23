@@ -2,6 +2,7 @@ class User < ApplicationRecord
   has_many :peeps, dependent: :destroy
 
   validates_presence_of :handle, :password_hash
+  validates_uniqueness_of :handle
 
   def password=(password)
     self.password_hash = BCrypt::Password.create(password)
