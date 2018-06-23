@@ -48,6 +48,10 @@ RSpec.describe SessionsController, type: :controller do
         post :create, params: {session: valid_attributes}, session: valid_session
         expect(response).to have_http_status(:created)
         expect(response.content_type).to eq('application/json')
+        expect(JSON.parse(response.body)).to eq(
+          "session_key" => User.last.session_key,
+          "user_id" => User.last.id
+        )
       end
     end
 

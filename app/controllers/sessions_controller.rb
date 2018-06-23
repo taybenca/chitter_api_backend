@@ -5,7 +5,10 @@ class SessionsController < ApplicationController
   def create
     user = User.find_by(handle: params[:session][:handle])
     if user.authenticate(params[:session][:password])
-      render json: { session_key: user.generate_session_key! }, status: :created
+      render json: {
+        user_id: user.id,
+        session_key: user.generate_session_key!
+      }, status: :created
     else
       render json: { errors: INVALID_AUTH_ERRORS }, status: :unprocessable_entity
     end
