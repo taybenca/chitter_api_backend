@@ -53,6 +53,16 @@ RSpec.describe PeepsController, type: :controller do
       peep = Peep.create! valid_attributes
       get :index, params: {}, session: valid_session
       expect(response).to be_successful
+      expect(JSON.parse(response.body)).to eq([{
+        "id" => peep.id,
+        "body" => peep.body,
+        "created_at" => peep.created_at.as_json,
+        "updated_at" => peep.updated_at.as_json,
+        "user" => {
+          "id" => peep.user.id,
+          "handle" => peep.user.handle
+        }
+      }])
     end
   end
 
@@ -61,6 +71,16 @@ RSpec.describe PeepsController, type: :controller do
       peep = Peep.create! valid_attributes
       get :show, params: {id: peep.to_param}, session: valid_session
       expect(response).to be_successful
+      expect(JSON.parse(response.body)).to eq({
+        "id" => peep.id,
+        "body" => peep.body,
+        "created_at" => peep.created_at.as_json,
+        "updated_at" => peep.updated_at.as_json,
+        "user" => {
+          "id" => peep.user.id,
+          "handle" => peep.user.handle
+        }
+      })
     end
   end
 
