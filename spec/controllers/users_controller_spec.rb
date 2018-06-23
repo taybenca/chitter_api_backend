@@ -66,11 +66,15 @@ RSpec.describe UsersController, type: :controller do
       end
 
       it "renders a JSON response with the new user" do
-
         post :create, params: {user: valid_attributes}, session: valid_session
         expect(response).to have_http_status(:created)
         expect(response.content_type).to eq('application/json')
-        expect(response.location).to eq(user_url(User.last))
+        user = User.last
+        expect(JSON.parse(response.body)).to eq({
+          "id" => user.id,
+          "handle" => user.handle
+        })
+        expect(response.location).to eq(user_url(user))
       end
     end
 

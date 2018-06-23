@@ -16,4 +16,8 @@ class User < ApplicationRecord
     update!(session_key: key)
     key
   end
+
+  def as_json(options = {})
+    super({ only: [:handle, :id] }.merge(options))
+  end
 end
