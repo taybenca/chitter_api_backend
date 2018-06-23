@@ -61,7 +61,7 @@ On success, the above command returns JSON structured like this:
 
 ### GET `/peeps`
 
-Returns a list of the last 50 peeps.
+Returns a list of the last 50 peeps in reverse chronological order.
 
 ```
 curl "https://chitter-backend-api.herokuapp.com/users"

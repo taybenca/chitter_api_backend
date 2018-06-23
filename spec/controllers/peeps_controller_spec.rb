@@ -49,26 +49,40 @@ RSpec.describe PeepsController, type: :controller do
   let(:valid_session) { {} }
 
   describe "GET #index" do
-    it "returns a success response" do
+    it "returns a JSON list of the peeps in reverse chronological order" do
       peep = Peep.create! valid_attributes
+      peep_2 = Peep.create! valid_attributes.merge(body: "Hello 2")
       get :index, params: {}, session: valid_session
       expect(response).to be_successful
-      expect(JSON.parse(response.body)).to eq([{
-        "id" => peep.id,
-        "body" => peep.body,
-        "created_at" => peep.created_at.as_json,
-        "updated_at" => peep.updated_at.as_json,
-        "user" => {
-          "id" => peep.user.id,
-          "handle" => peep.user.handle
+      expect(JSON.parse(response.body)).to eq([
+        {
+          "id" => peep_2.id,
+          "body" => peep_2.body,
+          "created_at" => peep_2.created_at.as_json,
+          "updated_at" => peep_2.updated_at.as_json,
+          "user" => {
+            "id" => peep_2.user.id,
+            "handle" => peep_2.user.handle
+          },
+          "likes" => []
         },
-        "likes" => []
-      }])
+        {
+          "id" => peep.id,
+          "body" => peep.body,
+          "created_at" => peep.created_at.as_json,
+          "updated_at" => peep.updated_at.as_json,
+          "user" => {
+            "id" => peep.user.id,
+            "handle" => peep.user.handle
+          },
+          "likes" => []
+        }
+      ])
     end
   end
 
   describe "GET #show" do
-    it "returns a success response" do
+    it "returns JSON of the peep" do
       peep = Peep.create! valid_attributes
       peep.likes.create!(user: other_user)
       get :show, params: {id: peep.to_param}, session: valid_session
