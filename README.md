@@ -202,6 +202,16 @@ curl "https://chitter-backend-api.herokuapp.com/peeps/2/likes/1" \
 
 The above command returns a `204: No Content` response on success.
 
+### Error responses
+
+The create/update endpoints return errors of the form:
+
+```json
+{
+  "peep": ["handle already taken"]
+}
+```
+
 ## API Development Quickstart
 
 **If you're doing the challenge — you don't need to do this.**
