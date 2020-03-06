@@ -3,7 +3,7 @@
 This is an API backend for a \*witter-like app. It has users, sessions posts,
 and likes.
 
-It is deployed at `https://chitter-backend-api.herokuapp.com/`
+It is deployed at `https://chitter-backend-api-v2.herokuapp.com/`
 
 ## API docs
 
@@ -18,7 +18,7 @@ If you ever need more information, pass the `-v` flag to curl in addition to the
 Creates a new user.
 
 ```bash
-curl "https://chitter-backend-api.herokuapp.com/users" \
+curl "https://chitter-backend-api-v2.herokuapp.com/users" \
   -X POST \
   -H "Content-Type: application/json" \
   -d '{"user": {"handle":"kay", "password":"mypassword"}}'
@@ -42,7 +42,7 @@ Creates a new session, giving you a `user_id` and `session_key` required to perf
 Creating a new session renders any previous `session_key`s invalid.
 
 ```bash
-curl "https://chitter-backend-api.herokuapp.com/sessions" \
+curl "https://chitter-backend-api-v2.herokuapp.com/sessions" \
   -X POST \
   -H "Content-Type: application/json" \
   -d '{"session": {"handle":"kay", "password":"mypassword"}}'
@@ -64,7 +64,7 @@ On success, the above command returns JSON structured like this:
 Returns a list of the last 50 peeps in reverse chronological order.
 
 ```
-curl "https://chitter-backend-api.herokuapp.com/peeps"
+curl "https://chitter-backend-api-v2.herokuapp.com/peeps"
 ```
 
 On success, the above command returns JSON structured like this:
@@ -97,7 +97,7 @@ Creates a new Peep.
 This endpoint requires a `user_id` and `session_key` given as a token in the authorization header.
 
 ```bash
-curl "https://chitter-backend-api.herokuapp.com/peeps" \
+curl "https://chitter-backend-api-v2.herokuapp.com/peeps" \
   -X POST \
   -H "Authorization: Token token=a_valid_session_key" \
   -H "Content-Type: application/json" \
@@ -130,7 +130,7 @@ On success, the above command returns JSON structured like this:
 Returns a single Peep.
 
 ```bash
-curl "https://chitter-backend-api.herokuapp.com/peeps/1"
+curl "https://chitter-backend-api-v2.herokuapp.com/peeps/1"
 ```
 
 On success, the above command returns JSON structured like this:
@@ -156,7 +156,7 @@ Deletes a Peep.
 This endpoint requires a `user_id` and `session_key` given as a token in the authorization header.
 
 ```bash
-curl "https://chitter-backend-api.herokuapp.com/peeps/1" \
+curl "https://chitter-backend-api-v2.herokuapp.com/peeps/1" \
   -X DELETE \
   -H "Authorization: Token token=a_valid_session_key"
 ```
@@ -172,7 +172,7 @@ Adds a Like to the Peep by the User.
 This endpoint requires a `user_id` and `session_key` given as a token in the authorization header.
 
 ```bash
-curl "https://chitter-backend-api.herokuapp.com/peeps/2/likes/1" \
+curl "https://chitter-backend-api-v2.herokuapp.com/peeps/2/likes/1" \
   -X PUT \
   -H "Authorization: Token token=a_valid_session_key"
 ```
@@ -195,7 +195,7 @@ Removes the Like on the Peep by the User.
 This endpoint requires a `user_id` and `session_key` given as a token in the authorization header.
 
 ```bash
-curl "https://chitter-backend-api.herokuapp.com/peeps/2/likes/1" \
+curl "https://chitter-backend-api-v2.herokuapp.com/peeps/2/likes/1" \
   -X DELETE \
   -H "Authorization: Token token=a_valid_session_key"
 ```
@@ -220,4 +220,13 @@ The create/update endpoints return errors of the form:
 $ bundle
 $ rspec
 $ rails server
+```
+
+### Heroku
+
+Auth details for the Makers Heroku account are in 1passward
+
+#### Logs
+```bash
+$ heroku logs -a chitter-backend-api-v2
 ```
