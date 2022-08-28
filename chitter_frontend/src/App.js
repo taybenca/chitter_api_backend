@@ -17,20 +17,16 @@ const App = () => {
   }, []);
 
 
-
-
-
   return (
     <div className="App">
       <Banner />
       {posts.map((post) => {
          return (
-            <div className="post-card" key={post.id}>
+            <div className ="card">
                <p className="post-body">{post.body}</p>
-               <p className="post-date-created">{post.created_at}</p>
-               {/* <p className="post-date-updated">{post.updated_at}</p> */}
-               {/* <p className="post-user">{post.user.handle}</p> */}
-               {/* <p className="post-likes">{post.likes}</p> */}
+               <p className="post-user">User: {post.user.handle}</p>
+               <p className="post-likes">Likes: {post.likes.length}</p>
+               <p className="post-date-created">Created at: {post.created_at}</p>
             </div>
          );
       })}
